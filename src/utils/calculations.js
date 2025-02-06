@@ -1,8 +1,8 @@
 export const calculateVariance = (current, original) => {
   try {
-    return original === 0
-      ? 0
-      : Number((((current - original) / original) * 100).toFixed(2));
+    if (original === 0) return 0;
+    const variance = ((current - original) / original) * 100;
+    return Number(variance.toFixed(2));
   } catch (error) {
     console.error("Variance Calculation Error:", error);
     return 0;
@@ -13,11 +13,14 @@ export const updateParentValues = (rows) => {
   try {
     return rows.map((parent) => {
       if (parent.children) {
+        const originalValue = parent.value; // Store old value before update
         const newValue = parent.children.reduce(
-          (sum, child) => sum + child.value,
+          (sum, child) => sum + Number(child.value),
           0
         );
-        return { ...parent, value: newValue };
+        const variance = calculateVariance(newValue, originalValue); // Calculate variance
+
+        return { ...parent, value: newValue, variance };
       }
       return parent;
     });

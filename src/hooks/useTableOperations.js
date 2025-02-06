@@ -34,23 +34,26 @@ export const useTableOperations = (initialData) => {
   const handleAllocationValue = (id, inputValue) => {
     try {
       const updatedData = data.map((item) => {
-        if (item.id === id) return { ...item, value: inputValue };
+        if (item.id === id) {
+          const oldValue = item.value;
+          const variance = ((inputValue - oldValue) / oldValue) * 100;
+          return { ...item, value: inputValue, variance: variance.toFixed(2) };
+        }
 
         if (item.children) {
           const childUpdated = item.children.map((child) =>
-            child.id === id ? { ...child, value: inputValue } : child
+            child.id === id
+              ? {
+                  ...child,
+                  value: inputValue,
+                  variance: (
+                    ((inputValue - child.value) / child.value) *
+                    100
+                  ).toFixed(2),
+                }
+              : child
           );
-
-          const totalChildValue = childUpdated.reduce(
-            (sum, child) => sum + child.value,
-            0
-          );
-          const updatedChildrenWithProportion = childUpdated.map((child) => ({
-            ...child,
-            value: (child.value / totalChildValue) * inputValue,
-          }));
-
-          return { ...item, children: updatedChildrenWithProportion };
+          return { ...item, children: childUpdated };
         }
         return item;
       });
